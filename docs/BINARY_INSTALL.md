@@ -31,14 +31,14 @@ Use the provided download script:
 ```bash
 CORTEXDB_OWNER=modh93 \
 CORTEXDB_REPO=cortexdb \
-CORTEXDB_RELEASE_TAG=v3.4.0 \
+CORTEXDB_RELEASE_TAG=v3.4.0-bin1 \
 ./scripts/download_cortexdb_linux.sh
 ```
 
 **Environment variables:**
 - `CORTEXDB_OWNER` - GitHub owner/org (required)
 - `CORTEXDB_REPO` - Repository name (default: `cortexdb`)
-- `CORTEXDB_RELEASE_TAG` - Release tag (required, e.g., `v3.4.0`)
+- `CORTEXDB_RELEASE_TAG` - Release tag (required, e.g., `v3.4.0-bin1`)
 
 ### What the Script Does
 
@@ -128,7 +128,7 @@ chmod +x ./bin/cortexdbd
 
 If you prefer to download manually:
 
-1. Go to GitHub Releases: `https://github.com/OWNER/REPO/releases/tag/v3.4.0`
+1. Go to GitHub Releases: `https://github.com/OWNER/REPO/releases/tag/v3.4.0-bin1`
 2. Download `cortexdbd-linux-x86_64`
 3. Download `cortexdbd-linux-x86_64.sha256`
 4. Verify checksum: `sha256sum -c cortexdbd-linux-x86_64.sha256`

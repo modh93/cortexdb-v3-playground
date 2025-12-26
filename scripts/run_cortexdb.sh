@@ -25,7 +25,7 @@ if [[ ! -f "$BINARY" ]]; then
     echo ""
     echo "Download it first:"
     echo "  CORTEXDB_OWNER=modh93 \\"
-    echo "  CORTEXDB_RELEASE_TAG=v3.4.0 \\"
+    echo "  CORTEXDB_RELEASE_TAG=v3.4.0-bin1 \\"
     echo "  ./scripts/download_cortexdb_linux.sh"
     exit 1
 fi

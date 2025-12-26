@@ -10,7 +10,7 @@ A minimal, offline-capable playground to explore CortexDB's HTTP API. No cloud, 
 
 1. **CortexDB binary** (no source code access required)
    - Download: See [Binary Installation Guide](docs/BINARY_INSTALL.md)
-   - Quick: `CORTEXDB_OWNER=modh93 CORTEXDB_RELEASE_TAG=v3.4.0 ./scripts/download_cortexdb_linux.sh`
+   - Quick: `CORTEXDB_OWNER=modh93 CORTEXDB_RELEASE_TAG=v3.4.0-bin1 ./scripts/download_cortexdb_linux.sh`
 
 2. **A modern web browser** (Chrome, Firefox, Safari, Edge)
 
@@ -24,7 +24,7 @@ A minimal, offline-capable playground to explore CortexDB's HTTP API. No cloud, 
 
 ```bash
 CORTEXDB_OWNER=modh93 \
-CORTEXDB_RELEASE_TAG=v3.4.0 \
+CORTEXDB_RELEASE_TAG=v3.4.0-bin1 \
 ./scripts/download_cortexdb_linux.sh
 ```
 
