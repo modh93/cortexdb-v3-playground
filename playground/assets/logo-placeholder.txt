@@ -1,0 +1,5 @@
+TODO: Add CortexDB logo here
+- SVG format preferred
+- Max dimensions: 200x200px
+- Should work in light and dark themes
+

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CortexDB V3 Playground</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>CortexDB V3 Playground</h1>
+            <p class="subtitle">Local-first • Offline-capable • No dependencies</p>
+        </header>
+
+        <section class="config">
+            <label for="baseUrl">Base URL:</label>
+            <input type="text" id="baseUrl" value="http://127.0.0.1:8080" placeholder="http://127.0.0.1:8080">
+            <button onclick="testConnection()">Test Connection</button>
+        </section>
+
+        <div class="main-content">
+            <div class="operations">
+                <section class="op-group">
+                    <h2>System</h2>
+                    <button onclick="callHealth()">Health</button>
+                    <button onclick="callStats()">Stats</button>
+                </section>
+
+                <section class="op-group">
+                    <h2>Key-Value</h2>
+                    <div class="kv-inputs">
+                        <input type="text" id="kvKey" placeholder="Key (e.g., user:1)">
+                        <input type="text" id="kvValue" placeholder="Value (e.g., Alice)">
+                    </div>
+                    <div class="kv-buttons">
+                        <button onclick="kvPut()">PUT</button>
+                        <button onclick="kvGet()">GET</button>
+                        <button onclick="kvDelete()">DELETE</button>
+                    </div>
+                </section>
+
+                <section class="op-group">
+                    <h2>Range Scan</h2>
+                    <div class="scan-inputs">
+                        <input type="text" id="rangeStart" placeholder="Start key (Base64)">
+                        <input type="text" id="rangeEnd" placeholder="End key (Base64)">
+                        <input type="number" id="rangeLimit" placeholder="Limit" value="10">
+                    </div>
+                    <button onclick="rangeScan()">POST /range</button>
+                </section>
+
+                <section class="op-group">
+                    <h2>Prefix Scan</h2>
+                    <div class="scan-inputs">
+                        <input type="text" id="prefixKey" placeholder="Prefix (Base64)">
+                        <input type="number" id="prefixLimit" placeholder="Limit" value="10">
+                    </div>
+                    <button onclick="prefixScan()">POST /prefix</button>
+                </section>
+
+                <section class="op-group">
+                    <h2>Transactions</h2>
+                    <div class="tx-controls">
+                        <button onclick="txBegin()">Begin</button>
+                        <input type="text" id="txId" placeholder="Transaction ID" readonly>
+                    </div>
+                    <div class="kv-inputs">
+                        <input type="text" id="txKey" placeholder="Key">
+                        <input type="text" id="txValue" placeholder="Value">
+                    </div>
+                    <div class="tx-buttons">
+                        <button onclick="txPut()">Tx PUT</button>
+                        <button onclick="txGet()">Tx GET</button>
+                        <button onclick="txCommit()">Commit</button>
+                        <button onclick="txAbort()">Abort</button>
+                    </div>
+                </section>
+            </div>
+
+            <div class="console">
+                <h2>Console</h2>
+                <div id="consoleOutput"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+
