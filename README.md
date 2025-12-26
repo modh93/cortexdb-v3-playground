@@ -8,9 +8,9 @@ A minimal, offline-capable playground to explore CortexDB's HTTP API. No cloud, 
 
 ## What you need
 
-1. **CortexDB server running locally** on `http://127.0.0.1:8080`
-   - Build: `cargo build --release --features v3_server`
-   - Run: `./target/release/cortexdbd --db-path /tmp/cortexdb_data --port 8080`
+1. **CortexDB binary** (no source code access required)
+   - Download: See [Binary Installation Guide](docs/BINARY_INSTALL.md)
+   - Quick: `CORTEXDB_OWNER=modh93 CORTEXDB_RELEASE_TAG=v3.4.0 ./scripts/download_cortexdb_linux.sh`
 
 2. **A modern web browser** (Chrome, Firefox, Safari, Edge)
 
@@ -20,23 +20,51 @@ A minimal, offline-capable playground to explore CortexDB's HTTP API. No cloud, 
 
 ## Quick demo
 
-1. **Start CortexDB server** (see above)
+### Step 1: Download CortexDB Binary (No Source Access)
 
-2. **Open the playground**:
-   ```bash
-   # Option 1: Direct file (may have CORS restrictions)
-   open playground/index.html
-   
-   # Option 2: Static server (recommended)
-   ./scripts/run_static_server.sh
-   # Then open http://localhost:8000/playground/index.html
-   ```
+```bash
+CORTEXDB_OWNER=modh93 \
+CORTEXDB_RELEASE_TAG=v3.4.0 \
+./scripts/download_cortexdb_linux.sh
+```
 
-3. **Try it**:
-   - Click "Health" to verify connection
-   - Put a key/value pair
-   - Get it back
-   - Explore range scans and transactions
+**Note:** For private releases, ensure GitHub CLI is installed and authenticated:
+```bash
+gh auth login
+```
+
+### Step 2: Run CortexDB
+
+```bash
+./scripts/run_cortexdb.sh
+```
+
+CortexDB will start on `http://127.0.0.1:8080`
+
+### Step 3: Open Playground
+
+In a new terminal:
+
+```bash
+./scripts/run_static_server.sh
+# Then open: http://localhost:8000/playground/index.html
+```
+
+### Step 4: Try It
+
+- Click "Health" to verify connection
+- Put a key/value pair
+- Get it back
+- Explore range scans and transactions
+
+---
+
+## Alternative: Run CortexDB from Source
+
+If you have access to the CortexDB repository:
+
+1. **Build**: `cargo build --release --features v3_server`
+2. **Run**: `./target/release/cortexdbd --db-path /tmp/cortexdb_data --port 8080`
 
 ---
 
