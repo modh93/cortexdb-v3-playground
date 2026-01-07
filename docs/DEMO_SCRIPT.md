@@ -15,12 +15,14 @@
    ./target/release/cortexdbd --db-path /tmp/cortexdb_demo --port 8080
    ```
 
-2. **Open playground:**
+2. **Start playground server:**
    ```bash
    cd /path/to/cortexdb-v3-playground
-   ./scripts/run_static_server.sh
+   ./scripts/run_playground_proxy.sh
    # Open: http://localhost:8000/playground/index.html
    ```
+   
+   **Note:** The proxy server avoids CORS issues by forwarding `/api/*` requests to CortexDB on the same origin.
 
 ---
 
@@ -110,7 +112,7 @@
 
 **TODO:** Prepare for:
 - Server not starting
-- CORS issues
+- CORS issues (should be resolved with proxy server)
 - Encoding questions
 - Performance questions
 

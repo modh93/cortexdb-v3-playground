@@ -1,0 +1,17 @@
+{
+  "name": "cortexdb-v3-playground",
+  "version": "1.0.0",
+  "description": "Local-first playground for CortexDB V3",
+  "type": "module",
+  "scripts": {
+    "playground:serve": "node scripts/playground_server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "http-proxy-middleware": "^2.0.6"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
+

@@ -4,7 +4,15 @@ let currentTxId = null;
 
 // Get base URL from input
 function getBaseUrl() {
-    return document.getElementById('baseUrl').value.trim() || 'http://127.0.0.1:8080';
+    const input = document.getElementById('baseUrl').value.trim();
+    
+    // If user provided an absolute URL (starts with http:// or https://), use it as-is
+    if (input && (input.startsWith('http://') || input.startsWith('https://'))) {
+        return input;
+    }
+    
+    // Otherwise, use relative path "/api" (default) or user's input if provided
+    return input || '/api';
 }
 
 // Encoding helpers
