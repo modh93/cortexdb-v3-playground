@@ -90,10 +90,16 @@ if command -v gh >/dev/null 2>&1; then
     # Verify checksum
     if [[ -f "$SHA256_NAME" ]]; then
         echo -e "${YELLOW}Verifying checksum...${NC}"
-        if sha256sum -c "$SHA256_NAME"; then
+        # Extract expected hash from .sha256 file (format: hash  filename)
+        EXPECTED_HASH=$(awk '{print $1}' "$SHA256_NAME")
+        ACTUAL_HASH=$(sha256sum "$BINARY_NAME" | awk '{print $1}')
+        
+        if [[ "$EXPECTED_HASH" == "$ACTUAL_HASH" ]]; then
             echo -e "${GREEN}✓ Checksum verified${NC}"
         else
             echo -e "${RED}Error: Checksum verification failed${NC}"
+            echo "Expected: $EXPECTED_HASH"
+            echo "Actual:   $ACTUAL_HASH"
             exit 1
         fi
         rm "$SHA256_NAME"
@@ -132,10 +138,16 @@ else
     # Verify checksum if available
     if [[ -f "$SHA256_NAME" ]]; then
         echo -e "${YELLOW}Verifying checksum...${NC}"
-        if sha256sum -c "$SHA256_NAME"; then
+        # Extract expected hash from .sha256 file (format: hash  filename)
+        EXPECTED_HASH=$(awk '{print $1}' "$SHA256_NAME")
+        ACTUAL_HASH=$(sha256sum "$BINARY_NAME" | awk '{print $1}')
+        
+        if [[ "$EXPECTED_HASH" == "$ACTUAL_HASH" ]]; then
             echo -e "${GREEN}✓ Checksum verified${NC}"
         else
             echo -e "${RED}Error: Checksum verification failed${NC}"
+            echo "Expected: $EXPECTED_HASH"
+            echo "Actual:   $ACTUAL_HASH"
             exit 1
         fi
         rm "$SHA256_NAME"
