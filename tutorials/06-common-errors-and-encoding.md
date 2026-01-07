@@ -1,67 +1,237 @@
-# Tutorial 06 — Common Errors and Encoding
+# 06 — Erreurs courantes & encodage
 
 ## Objectif
+Identifier et comprendre les **erreurs les plus fréquentes** rencontrées
+lors de l’utilisation de CortexDB V3, et maîtriser définitivement
+les **règles d’encodage** (clé / valeur).
 
-TODO: Comprendre les erreurs courantes et maîtriser l'encodage Base64/URL.
+À la fin de ce tutoriel, vous saurez :
+- reconnaître les erreurs API les plus courantes
+- interpréter le modèle d’erreur standard
+- corriger rapidement un problème d’encodage
+- savoir quand utiliser le playground plutôt que `curl`
 
-## Prérequis
+---
 
-TODO: Avoir fait les tutorials précédents et rencontré quelques erreurs.
+## Rappel — modèle d’erreur standard
 
-## Erreurs Courantes
+Lorsqu’une requête échoue, CortexDB renvoie un JSON structuré :
 
-### 404 Not Found
+```json
+{
+  "error_code": "ERROR_CODE",
+  "message": "human readable message",
+  "details": "optional"
+}
+````
 
-TODO: Causes et solutions :
-- Clé mal encodée dans l'URL
-- Clé n'existe pas vraiment
-- Vérification de l'encodage
+### Champs
 
-### 400 Bad Request
+* `error_code` : code stable, exploitable par un programme
+* `message` : message explicatif
+* `details` : information optionnelle (debug)
 
-TODO: Causes et solutions :
-- JSON mal formé
-- Base64 invalide dans le body
-- Paramètres manquants
+---
 
-### 413 Payload Too Large
+## Erreur 1 — Clé non trouvée (`KEY_NOT_FOUND`)
 
-TODO: Causes et solutions :
-- Valeur trop grande
-- Limites du serveur
+### Symptôme
 
-## Encodage : Cas Pratiques
+```json
+{
+  "error_code": "KEY_NOT_FOUND",
+  "message": "key not found"
+}
+```
 
-### Cas 1 : Clé simple
+### Causes possibles
 
-TODO: Exemple avec clé sans caractères spéciaux :
-- `"user:1"` → Base64 → URL
-- Pas de changement pour URL encoding
+* la clé n’existe pas
+* la clé est mal encodée
+* la clé a été supprimée
 
-### Cas 2 : Clé avec caractères spéciaux
+### Vérifications
 
-TODO: Exemple avec clé contenant `/`, `+`, `=` :
-- Base64 peut contenir ces caractères
-- URL encoding nécessaire
+* la clé est-elle bien encodée en Base64 ?
+* la clé encodée est-elle identique à celle utilisée lors du `PUT` ?
 
-### Cas 3 : Valeur dans JSON
+---
 
-TODO: Exemple montrant :
-- Base64 seulement (pas d'URL encoding)
-- Décodage pour vérification
+## Erreur 2 — Encodage Base64 invalide
 
-## Debugging Tips
+### Symptôme
 
-TODO: Conseils pour déboguer :
-- Utiliser le playground console
-- Vérifier chaque étape d'encodage
-- Tester avec curl pour isoler les problèmes
+```json
+{
+  "error_code": "INVALID_BASE64",
+  "message": "invalid base64 encoding"
+}
+```
+
+### Cause
+
+* la valeur envoyée n’est pas un Base64 valide
+* caractères manquants (`=`), chaîne tronquée, etc.
+
+### Règle à retenir
+
+* **toutes les valeurs** doivent être envoyées en Base64
+* aucun texte brut n’est accepté dans les bodies JSON
+
+---
+
+## Erreur 3 — Oubli du percent-encoding dans l’URL
+
+### Symptôme
+
+* erreur 400
+* clé introuvable alors qu’elle existe
+
+### Exemple problématique
+
+Clé texte :
+
+```
+user/a
+```
+
+Encodage Base64 :
+
+```
+dXNlci9h
+```
+
+Cette valeur contient `/` → **doit être percent-encodée** :
+
+```
+dXNlci9h  →  dXNlci9h%2F
+```
+
+### Solution
+
+* toujours appliquer :
+
+  1. Base64
+  2. URL percent-encoding
+
+---
+
+## Erreur 4 — Transaction inconnue (`TX_NOT_FOUND`)
+
+### Symptôme
+
+```json
+{
+  "error_code": "TX_NOT_FOUND",
+  "message": "transaction not found"
+}
+```
+
+### Causes possibles
+
+* `tx_id` incorrect
+* transaction déjà commit ou abort
+* serveur redémarré
+
+### Solution
+
+* démarrer une nouvelle transaction
+* vérifier que le serveur n’a pas été redémarré
+
+---
+
+## Erreur 5 — Mauvaise méthode HTTP
+
+### Symptôme
+
+```json
+{
+  "error_code": "METHOD_NOT_ALLOWED",
+  "message": "method not allowed"
+}
+```
+
+### Cause
+
+* `GET` au lieu de `POST`
+* `POST` au lieu de `PUT`, etc.
+
+### Solution
+
+* vérifier la méthode HTTP
+* se référer à la spécification OpenAPI
+
+---
+
+## Erreur 6 — Serveur non disponible
+
+### Symptôme
+
+```text
+Connection refused
+```
+
+### Causes possibles
+
+* CortexDB n’est pas lancé
+* mauvais port
+* serveur arrêté
+
+### Solution
+
+```bash
+./scripts/run_cortexdb.sh
+```
+
+Puis vérifier :
+
+```bash
+curl http://127.0.0.1:8080/health
+```
+
+---
+
+## Quand utiliser le playground
+
+Utilisez le playground si :
+
+* vous doutez de l’encodage
+* vous testez une requête pour la première fois
+* vous voulez visualiser les requêtes HTTP réelles
+
+Le playground :
+
+* encode automatiquement
+* affiche les données en clair et encodées
+* montre les requêtes et réponses brutes
+
+---
+
+## Checklist de debug rapide
+
+Avant de conclure à un bug :
+
+* [ ] le serveur est lancé
+* [ ] l’URL est correcte (`127.0.0.1`)
+* [ ] la clé est Base64 + URL-encodée
+* [ ] la valeur est Base64
+* [ ] la méthode HTTP est correcte
+* [ ] la transaction est valide (si utilisée)
+
+---
 
 ## Points à retenir
 
-TODO: Points clés :
-- Toujours vérifier l'encodage en cas d'erreur
-- Clés dans URL : Base64 + URL percent-encoding
-- Valeurs dans JSON : Base64 seulement
-- Le playground montre les étapes d'encodage
+* la majorité des erreurs viennent de l’encodage
+* le modèle d’erreur est stable et explicite
+* le playground est un outil de debug, pas juste une démo
+* CortexDB privilégie la clarté contractuelle à la magie implicite
 
+---
+
+## Suite
+
+Vous avez terminé les tutoriels principaux.
+
+➡️ Vous pouvez maintenant passer aux **exercices pratiques**
+dans `tutorials/exercises/`.

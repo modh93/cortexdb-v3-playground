@@ -1,66 +1,274 @@
-# Tutorial 05 — Transactions
+# 05 — Transactions
 
 ## Objectif
+Comprendre et utiliser les **transactions** dans CortexDB afin de :
+- regrouper plusieurs opérations KV
+- garantir la cohérence des écritures
+- valider ou annuler un ensemble d’actions de manière atomique
 
-TODO: Apprendre à utiliser les transactions pour des opérations atomiques.
+À la fin de ce tutoriel, vous saurez :
+- démarrer une transaction
+- effectuer des opérations KV dans une transaction
+- valider (commit) ou annuler (abort) une transaction
+
+---
 
 ## Prérequis
 
-TODO: Compréhension des opérations KV de base (tutorial 03).
+- Avoir suivi `04 — Range & Prefix`
+- CortexDB en cours d’exécution sur :
+```
 
-## Begin Transaction
+[http://127.0.0.1:8080](http://127.0.0.1:8080)
+
+````
+
+---
+
+## Principe des transactions dans CortexDB
+
+Une transaction suit toujours le même cycle :
+
+1. **Begin** → création d’un contexte transactionnel
+2. **Operations** → `put` / `get` dans la transaction
+3. **Commit** ou **Abort**
+
+Tant qu’une transaction n’est pas validée :
+- les écritures ne sont **pas visibles** hors transaction
+- elles peuvent être **annulées**
+
+---
+
+## Étape 1 — Démarrer une transaction
+
+### Commande
+
+```bash
+curl -X POST http://127.0.0.1:8080/tx/begin
+````
+
+### Résultat attendu (exemple)
+
+```json
+{
+  "tx_id": "tx-123456"
+}
+```
+
+💡 Notez soigneusement la valeur de `tx_id`, elle sera utilisée dans toutes les étapes suivantes.
+
+---
+
+## Étape 2 — Écrire une valeur dans la transaction
+
+### Exemple de données
+
+* clé (texte) : `user:10`
+* valeur (texte) : `David`
+
+Encodages :
+
+* clé base64 : `dXNlcjoxMA==`
+* valeur base64 : `RGF2aWQ=`
+
+---
+
+### Commande
+
+```bash
+curl -X POST http://127.0.0.1:8080/tx/tx-123456/put \
+  -H "Content-Type: application/json" \
+  -d '{
+    "key": "dXNlcjoxMA==",
+    "value": "RGF2aWQ="
+  }'
+```
+
+### Résultat attendu
+
+```json
+{
+  "status": "ok"
+}
+```
+
+---
+
+## Étape 3 — Lire une valeur dans la transaction
+
+### Commande
+
+```bash
+curl http://127.0.0.1:8080/tx/tx-123456/get/dXNlcjoxMA==
+```
+
+### Résultat attendu
+
+```json
+{
+  "value": "RGF2aWQ="
+}
+```
+
+Décodage :
+
+```text
+RGF2aWQ= → David
+```
+
+💡 Cette valeur **n’est pas encore visible hors transaction**.
+
+---
+
+## Étape 4 — Vérifier l’invisibilité hors transaction
+
+### Commande
+
+```bash
+curl http://127.0.0.1:8080/kv/dXNlcjoxMA==
+```
+
+### Résultat attendu (exemple)
+
+```json
+{
+  "error_code": "KEY_NOT_FOUND",
+  "message": "key not found"
+}
+```
+
+---
+
+## Étape 5 — Valider la transaction (commit)
+
+### Commande
+
+```bash
+curl -X POST http://127.0.0.1:8080/tx/tx-123456/commit
+```
+
+### Résultat attendu
+
+```json
+{
+  "status": "ok"
+}
+```
+
+---
+
+## Étape 6 — Lire la valeur après commit
+
+### Commande
+
+```bash
+curl http://127.0.0.1:8080/kv/dXNlcjoxMA==
+```
+
+### Résultat attendu
+
+```json
+{
+  "value": "RGF2aWQ="
+}
+```
+
+---
+
+## Étape 7 — Annuler une transaction (abort)
+
+### Cas d’usage
+
+Si vous souhaitez **annuler toutes les écritures** effectuées dans une transaction.
 
 ### Commandes
 
-TODO: Commandes pour :
-- `POST /tx/begin`
-- Récupérer le TX ID
-- Comprendre l'isolation
+```bash
+curl -X POST http://127.0.0.1:8080/tx/begin
+```
 
-### Résultats attendus
+```json
+{
+  "tx_id": "tx-789000"
+}
+```
 
-TODO:
-- Status code: 200
-- Body: `{"tx_id":"..."}`
-- TX ID à utiliser pour les opérations suivantes
+```bash
+curl -X POST http://127.0.0.1:8080/tx/tx-789000/abort
+```
 
-## Operations in Transaction
+### Résultat attendu
 
-### Commandes
+```json
+{
+  "status": "aborted"
+}
+```
 
-TODO: Commandes pour :
-- `POST /tx/{id}/put` (plusieurs clés)
-- `GET /tx/{id}/get/{key}` (lecture isolée)
-- Vérifier que les clés ne sont pas visibles en dehors de la transaction
+Aucune donnée n’est persistée.
 
-### Résultats attendus
+---
 
-TODO:
-- PUT dans transaction: 200
-- GET dans transaction: 200 avec valeur
-- GET hors transaction: 404 (pas encore commité)
+## Utilisation via le playground
 
-## Commit / Abort
+Dans le playground :
 
-### Commandes
+1. cliquez sur **Begin Transaction**
+2. copiez le `tx_id`
+3. utilisez **Tx Put** / **Tx Get**
+4. cliquez sur **Commit** ou **Abort**
+5. observez la visibilité des données
 
-TODO: Commandes pour :
-- `POST /tx/{id}/commit` (valider)
-- `POST /tx/{id}/abort` (annuler)
-- Vérifier l'état après commit/abort
+La console montre :
 
-### Résultats attendus
+* les requêtes transactionnelles
+* les réponses associées
+* l’ordre exact des appels HTTP
 
-TODO:
-- Commit: 200, les clés deviennent visibles
-- Abort: 200, les clés ne sont pas persistées
-- GET après commit: 200
-- GET après abort: 404
+---
+
+## Erreurs courantes
+
+### ❌ Transaction inconnue
+
+Erreur :
+
+```json
+{
+  "error_code": "TX_NOT_FOUND",
+  "message": "transaction not found"
+}
+```
+
+Cause :
+
+* `tx_id` incorrect
+* transaction déjà commit/abort
+
+---
+
+### ❌ Commit en double
+
+Cause :
+
+* tentative de commit après un commit ou abort
+
+Solution :
+
+* créer une nouvelle transaction
+
+---
 
 ## Points à retenir
 
-TODO: Points clés :
-- Transactions garantissent l'atomicité
-- Isolation : les changements ne sont visibles qu'après commit
-- Abort annule tous les changements de la transaction
+* les transactions garantissent la cohérence
+* les écritures sont isolées jusqu’au commit
+* `abort` annule toutes les opérations
+* chaque transaction est identifiée par un `tx_id`
 
+---
+
+## Prochaine étape
+
+➡️ Passez au tutoriel suivant :
+**06 — Erreurs courantes & encodage**
